@@ -1,15 +1,36 @@
-name: my-snap-name # you probably want to 'snapcraft register <name>'
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: dbeaver # you probably want to 'snapcraft register <name>'
+version: '4.3.1'
+summary: Universal SQL Client 
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  Free multi-platform database tool for developers, SQL programmers, database administrators and analysts. Supports all popular databases: MySQL, PostgreSQL, MariaDB, SQLite, Oracle, DB2, SQL Server, Sybase, MS Access, Teradata, Firebird, Derby, etc.
 
+grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
+icon: snap/gui/dbeaver.png
+
+apps:
+  dbeaver:
+    command: desktop-launch ${SNAP}/dbeaver
+    desktop: dbeaver.desktop
+    plugs: [home, network]
+
 
 parts:
-  my-part:
-    # See 'snapcraft plugins'
-    plugin: nil
+  java-jre:
+    plugin: jdk
+    source: .
+  dbeaver:
+    source: https://github.com/dbeaver/dbeaver/releases/download/$SNAPCRAFT_PROJECT_VERSION/dbeaver-ce-$SNAPCRAFT_PROJECT_VERSION-linux.gtk.x86_64.tar.gz
+    plugin: dump
+    after:
+      - desktop-glib-only
+    build-packages:
+    - ca-certificates
+    - ca-certificates-java    
+    stage-packages: 
+      - libgdk-pixbuf2.0-dev
+      - libgdk-pixbuf2.0-0
+    install: |
+        sed -i 's|Icon=.*|Icon=/dbeaver.png|g' $SNAPCRAFT_PART_INSTALL/dbeaver.desktop
+        chmod +x dbeaver     
+
