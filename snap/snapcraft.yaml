@@ -3,6 +3,7 @@ version: '4.3.3.1'
 summary: Universal SQL Client 
 description: |
   Free multi-platform database tool for developers, SQL programmers, database administrators and analysts. Supports all popular databases: MySQL, PostgreSQL, MariaDB, SQLite, Oracle, DB2, SQL Server, Sybase, MS Access, Teradata, Firebird, Derby, etc.
+icon: snap/gui/dbeaver.png
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
@@ -10,17 +11,24 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 apps:
   dbeaver:
     command: dbeaver
-    desktop: dbeaver.desktop
-    plugs: [home, network]
+    desktop: meta/gui/dbeaver.desktop
+    plugs: [home, network, x11, unity7, wayland]
 
 
 parts:
-  java-jre:
-    plugin: jdk
-    source: .
   dbeaver:
-    source: https://github.com/dbeaver/dbeaver/releases/download/$SNAPCRAFT_PROJECT_VERSION/dbeaver-ce-$SNAPCRAFT_PROJECT_VERSION-linux.gtk.x86_64.tar.gz
-    plugin: dump
+    source: https://github.com/dbeaver/dbeaver.git
+    plugin: maven
+    # override build in maven
+    build: |
+      mvn package
+    # copy output of build to root stage directory
+    organize:
+      product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver: ./
+    maven-targets:
+      - gui
+    maven-options:
+      - -DskipTests
     after:
       - desktop-glib-only
     build-packages:
@@ -29,7 +37,7 @@ parts:
     stage-packages: 
       - libgdk-pixbuf2.0-dev
       - libgdk-pixbuf2.0-0
-    install: |
-        sed -i 's|Icon=.*|Icon=/dbeaver.png|g' $SNAPCRAFT_PART_INSTALL/dbeaver.desktop
-        chmod +x dbeaver     
+    #install: |
+    #    sed -i 's|Icon=.*|Icon=/dbeaver.png|g' $SNAPCRAFT_PART_INSTALL/product/standalone/target/products/dbeaver.desktop
+    #    chmod +x $SNAPCRAFT_PART_INSTALL/product/standalone/target/products/dbeaver     
 
