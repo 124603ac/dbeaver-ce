@@ -11,7 +11,8 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 apps:
   dbeaver:
     command: dbeaver
-    desktop: meta/gui/dbeaver.desktop
+    # desktop entry not needed when desktop file provided from the snap/gui folder
+    #desktop: meta/gui/dbeaver.desktop
     plugs: [home, network, x11, unity7, wayland]
 
 
@@ -19,12 +20,21 @@ parts:
   dbeaver:
     source: https://github.com/dbeaver/dbeaver.git
     plugin: maven
-    # override build in maven
+    # override plugin build step. Plugin build expects a jar in the end which causes an error.
     build: |
       mvn package
-    # copy output of build to root stage directory
+    # Reorganize the built files for easier handling
     organize:
-      product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver: ./
+      product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver: bin
+    # if i have understood this correct, this below will make the files available in the snap root.
+    filesets:
+       binaries:
+        - dbeaver/*
+    # copy output of build to root stage directory
+    stage:
+      - $binaries
+    prime:
+      - $binaries
     maven-targets:
       - gui
     maven-options:
@@ -37,7 +47,17 @@ parts:
     stage-packages: 
       - libgdk-pixbuf2.0-dev
       - libgdk-pixbuf2.0-0
-    #install: |
-    #    sed -i 's|Icon=.*|Icon=/dbeaver.png|g' $SNAPCRAFT_PART_INSTALL/product/standalone/target/products/dbeaver.desktop
-    #    chmod +x $SNAPCRAFT_PART_INSTALL/product/standalone/target/products/dbeaver     
+    install: |
+      echo "+++++++++++++++++++++++++++++"
+      # trying to copy everything unde 
+      cp -r dbeaver $SNAPCRAFT_PART_INSTALL/
+      
+      # The specified command 'dbeaver' defined in the app 'dbeaver' does not exist or is not executable
+      echo "empty install"
+      
+      # sed -i 's|Icon=.*|Icon=/dbeaver.png|g' $SNAPCRAFT_PART_INSTALL/product/standalone/target/products/dbeaver.desktop
+      
+      
+      # chmod: cannot access 'dbeaver': No such file or directory 
+      # chmod +x dbeaver    
 
