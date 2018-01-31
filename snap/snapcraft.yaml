@@ -10,7 +10,7 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 
 apps:
   dbeaver:
-    command: dbeaver
+    command: desktop-launch $SNAP/dbeaver -data $SNAP_USER_DATA
     # desktop entry not needed when desktop file provided from the snap/gui folder
     #desktop: meta/gui/dbeaver.desktop
     plugs: [home, network, x11, unity7, wayland]
@@ -23,18 +23,19 @@ parts:
     # override plugin build step. Plugin build expects a jar in the end which causes an error.
     build: |
       mvn package
+    #  export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
     # Reorganize the built files for easier handling
-    organize:
-      product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver: bin
+    #organize:
+    #  product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver: dbeaver
     # if i have understood this correct, this below will make the files available in the snap root.
-    filesets:
-       binaries:
-        - dbeaver/*
+    #filesets:
+    #   binaries:
+    #    - dbeaver/*
     # copy output of build to root stage directory
-    stage:
-      - $binaries
-    prime:
-      - $binaries
+    #stage:
+    #  - $binaries
+    #prime:
+    #  - $binaries
     maven-targets:
       - gui
     maven-options:
@@ -50,7 +51,7 @@ parts:
     install: |
       echo "+++++++++++++++++++++++++++++"
       # trying to copy everything unde 
-      cp -r dbeaver $SNAPCRAFT_PART_INSTALL/
+      cp -r product/standalone/target/products/org.jkiss.dbeaver.core.product/linux/gtk/x86_64/dbeaver/. $SNAPCRAFT_PART_INSTALL/
       
       # The specified command 'dbeaver' defined in the app 'dbeaver' does not exist or is not executable
       echo "empty install"

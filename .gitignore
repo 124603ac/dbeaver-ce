@@ -2,6 +2,6 @@
 parts
 stage
 prime
-
+.snapcraft
 *.snap
 *.bz2
